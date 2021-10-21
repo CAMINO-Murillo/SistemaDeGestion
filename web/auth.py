@@ -1,4 +1,6 @@
-from flask import Blueprint, redirect, url_for, request, flash
+from flask import Blueprint, redirect, url_for, request, flash, Response
+from flask import json
+from flask.json import jsonify
 from flask_bcrypt import generate_password_hash, check_password_hash
 from flask_login import login_user, login_required, logout_user
 
@@ -35,19 +37,9 @@ def signup_post():
 
 @auth.route('/login', methods=['POST'])
 def login_post():
-    email = request.form.get('email')
+    name = request.form.get('name')
     password = request.form.get('password')
-    remember = True if request.form.get('remember') else False
-
-    user = User(name="Sean J Person", email="seanperson20@hotmail.com",
-                password="5f4dcc3b5aa765d61d8327deb882cf99")
-
-    # check if the user actually exists
-    # take the user-supplied password, hash it, and compare it to the hashed password in the database
-    if not user or not check_password_hash(user.password, password):
-        flash('Please check your login details and try again.')
-        # if the user doesn't exist or password is wrong, reload the page
-        return redirect(url_for('auth.login'))
-    login_user(user, remember=remember)
-    # if the above check passes, then we know the user has the right credentials
-    return redirect(url_for('main.profile'))
+    
+    if name == "yo" and password == "hey":
+        return jsonify({"status": "logged in"})
+    return Response(json.dumps({"status": "not logged in"}), status=400, mimetype='application/json')
