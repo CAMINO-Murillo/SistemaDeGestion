@@ -1,6 +1,7 @@
 
 from flask import Blueprint, request, session
 from flask.helpers import make_response
+from flask.json import jsonify
 from flask_bcrypt import generate_password_hash, check_password_hash
 from flask_login import login_required, logout_user
 from sqlalchemy.orm import Session
@@ -13,10 +14,9 @@ auth = Blueprint('auth', __name__)
 
 
 @auth.route('/logout')
-@login_required
 def logout():
-    logout_user()
-    return 'Logout'
+    session.pop("user_email")
+    return jsonify({"message": "Logged out sucessfuly"}), 200
 
 
 @auth.route('/signup', methods=['POST'])
