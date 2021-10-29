@@ -8,7 +8,15 @@ patients_blueprint = Blueprint('patients', __name__)
 
 @patients_blueprint.route("/api/v1/patients/<id>")
 def one_patient(id):
-    pass
+    db_session = Session(engine)
+
+    query = db_session.query(Paciente).filter(Paciente.id == id).one()
+
+    patient_data = query.__dict__
+    patient_data.pop('_sa_instance_state', None)
+    patient_data.pop('contraseña', None)
+
+    return jsonify(patient_data), 200
 
 
 @patients_blueprint.route("/api/v1/patients")
