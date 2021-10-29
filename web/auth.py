@@ -1,13 +1,13 @@
-import bcrypt
-from flask import Blueprint, redirect, url_for, request, flash
+
+from flask import Blueprint, request, session
+from flask.helpers import make_response
 from flask_bcrypt import generate_password_hash, check_password_hash
-from flask_login import login_user, login_required, logout_user
-from sqlalchemy.orm import Session, session
-from sqlalchemy.sql.expression import or_, select, text
+from flask_login import login_required, logout_user
+from sqlalchemy.orm import Session
+from sqlalchemy.sql.expression import text
 
 from .create_db import Medico, Paciente, engine
 
-from web.models import User
 
 auth = Blueprint('auth', __name__)
 
@@ -51,7 +51,7 @@ def signup_post():
 
 @auth.route('/login', methods=['POST'])
 def login_post():
-    name = request.form.get('name')
+    email = request.form.get('email')
     password = request.form.get('password')
 
     existing_user = engine.execute(text(
@@ -61,6 +61,10 @@ def login_post():
         return "Email doesn't exist", 400
 
     if (check_password_hash(existing_user["contraseña"], password)):
-        return "Logged in", 200
+        session["user_email"] = email
+
+        response = make_response("Logged in")
+        response.status_code = 200
+        return response
 
     return "Invalid credentials", 400
