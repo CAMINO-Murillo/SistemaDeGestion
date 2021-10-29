@@ -1,15 +1,15 @@
 
-from sqlalchemy.engine import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.functions import func
 from sqlalchemy.sql.schema import Column, ForeignKey
 
 from sqlalchemy.sql.sqltypes import DateTime, Integer, String, Text
-
-engine = create_engine("sqlite:///db.sqlite")
+from .app import engine
 
 Base = declarative_base()
+
+Base.metadata.create_all(engine)
 
 
 class Medico(Base):
@@ -20,31 +20,22 @@ class Medico(Base):
     apellido = Column(String, nullable=False)
     direccion = Column(String)
     telefono = Column(String)
+    email = Column(String)
     especialidad = Column(String)
     contraseña = Column(String)
-    email = Column(String, nullable=False)
-    contraseña = Column(String, nullable=False)
-
-    citas = relationship("Cita", back_populates='medico')
-    historias_clinicas = relationship(
-        "HistoriaClinica", back_populates='medico')
 
 
 class Paciente(Base):
     __tablename__ = 'pacientes'
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    nombre = Column(String)
-    apellido = Column(String)
+    nombre = Column(String, nullable=False)
+    apellido = Column(String, nullable=False)
     direccion = Column(String)
     telefono = Column(String)
+    email = Column(String)
     fecha_de_nacimiento = Column(DateTime)
-    email = Column(String, nullable=False)
-    contraseña = Column(String, nullable=False)
-
-    citas = relationship("Cita", back_populates='paciente')
-    historias_clinicas = relationship(
-        "HistoriaClinica", back_populates='paciente')
+    contraseña = Column(String)
 
 
 class Cita(Base):
@@ -57,8 +48,8 @@ class Cita(Base):
     tipo = Column(String)
     motivo = Column(Text)
 
-    medico = relationship('Medico', back_populates="citas")
-    paciente = relationship('Paciente', back_populates="citas")
+    medico = relationship('Medico', foreign_keys='Cita.id_medico')
+    paciente = relationship('Paciente', foreign_keys='Cita.id_paciente')
 
 
 class HistoriaClinica(Base):
@@ -70,9 +61,6 @@ class HistoriaClinica(Base):
     fecha = Column(DateTime(timezone=True), server_default=func.now())
     comentarios = Column(Text)
 
-    medico = relationship('Medico', back_populates='historias_clinicas')
+    medico = relationship('Medico', foreign_keys='HistoriaClinica.id_medico')
     paciente = relationship(
-        'Paciente', back_populates='historias_clinicas')
-
-
-Base.metadata.create_all(engine)
+        'Paciente', foreign_keys='HistoriaClinica.id_paciente')
